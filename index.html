@@ -115,14 +115,27 @@ async function updateStore(id, storeValue) {
     });
 }
 
-async function markBought(id) {
-    if(!confirm("Mark this item as bought?")) return;
-    await fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({ action: "update", type: "bought", index: id })
-    });
-    fetchList(); // Refresh
+async function markBought(name, item) {
+    if(!confirm(`Remove "${item}" from the list?`)) return;
+    
+    const status = document.getElementById('status');
+    status.innerText = "Removing...";
+
+    try {
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ 
+                action: "delete", 
+                name: name, 
+                item: item 
+            })
+        });
+        status.innerText = "🗑️ Deleted";
+        fetchList(); // Refresh the UI
+    } catch (error) {
+        status.innerText = "Error deleting.";
+    }
 }
 </script>
 
