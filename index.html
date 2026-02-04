@@ -67,26 +67,63 @@
         }
     }
 
-    async function fetchList() {
-        const listElement = document.getElementById('needs-list');
-        listElement.innerHTML = "<li>Loading...</li>";
+// Replace your fetchList function with this:
+async function fetchList() {
+    const listElement = document.getElementById('needs-list');
+    listElement.innerHTML = "<li>Loading...</li>";
+    const stores = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
 
-        try {
-            const response = await fetch(WEB_APP_URL);
-            const data = await response.json();
+    try {
+        const response = await fetch(WEB_APP_URL);
+        const data = await response.json();
+        listElement.innerHTML = "";
+
+        data.forEach(entry => {
+            const li = document.createElement('li');
+            li.className = "list-item";
             
-            listElement.innerHTML = "";
-            data.reverse().forEach(entry => { // .reverse() shows newest first
-                const li = document.createElement('li');
-                li.className = "list-item";
-                li.innerHTML = `<strong>${entry.name}</strong>: ${entry.item} <br> 
-                                <small style="color: #999">${entry.date}</small>`;
-                listElement.appendChild(li);
+            // Generate dropdown HTML
+            let storeOptions = `<option value="">Select Store</option>`;
+            stores.forEach(s => {
+                storeOptions += `<option value="${s}" ${entry.store === s ? 'selected' : ''}>${s}</option>`;
             });
-        } catch (error) {
-            listElement.innerHTML = "<li>Error loading list.</li>";
-        }
+
+            li.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${entry.name}</strong>: ${entry.item} <br>
+                        <small>${entry.date} | Current: ${entry.store}</small>
+                    </div>
+                    <div>
+                        <select onchange="updateStore(${entry.id}, this.value)">${storeOptions}</select>
+                        <button onclick="markBought(${entry.id})" style="width:auto; padding:5px; margin:0; background:#28a745;">✓</button>
+                    </div>
+                </div>`;
+            listElement.appendChild(li);
+        });
+    } catch (error) {
+        listElement.innerHTML = "<li>Error loading list.</li>";
     }
+}
+
+// Add these helper functions
+async function updateStore(id, storeValue) {
+    await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ action: "update", type: "store", index: id, value: storeValue })
+    });
+}
+
+async function markBought(id) {
+    if(!confirm("Mark this item as bought?")) return;
+    await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ action: "update", type: "bought", index: id })
+    });
+    fetchList(); // Refresh
+}
 </script>
 
 </body>
