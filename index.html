@@ -15,6 +15,11 @@
     <button onclick="sendData()">Add Request</button>
     <p id="status"></p>
 
+    <hr>
+    <h3>Current Needs</h3>
+    <button onclick="fetchList()">Refresh List</button>
+    <ul id="needs-list" style="list-style: none; padding: 0;"></ul>
+    
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec";
 
@@ -39,6 +44,32 @@
                 status.innerText = "Error: " + error;
             }
         }
+
+        async function fetchList() {
+            const listElement = document.getElementById('needs-list');
+            listElement.innerHTML = "Loading list...";
+
+        try {
+            const response = await fetch(WEB_APP_URL);
+            const data = await response.json();
+        
+            listElement.innerHTML = ""; // Clear loader
+        
+            data.forEach(entry => {
+                const li = document.createElement('li');
+                li.style.borderBottom = "1px solid #eee";
+                li.style.padding = "10px 0";
+                li.innerHTML = `<strong>${entry.name}</strong> needs <strong>${entry.item}</strong> <br> 
+                                <small style="color: #666">${entry.date}</small>`;
+                listElement.appendChild(li);
+            });
+        } catch (error) {
+            listElement.innerHTML = "Error loading list. Ensure you deployed the script as 'Anyone'.";
+            }
+        }
+
+        // Call this on page load to see current items
+        window.onload = fetchList;
     </script>
 </body>
 </html>
