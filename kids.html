@@ -2,20 +2,16 @@
 <html>
 <head>
     <title>Request Something</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">    
-    <meta name="application-name" content="Need List">
-    <meta name="apple-mobile-web-app-title" content="Need List">
-    <meta name="theme-color" content="#2b7de9">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#28a745">
+    <link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/3514/3514491.png">
     <style>
         body { font-family: sans-serif; padding: 40px 20px; text-align: center; background-color: #eef2f7; }
         .kid-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        h1 { color: #2b7de9; font-size: 1.5em; margin-bottom: 20px; }
+        h1 { color: #2b7de9; }
         input { width: 100%; padding: 15px; font-size: 1.2em; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; font-size: 1.2em; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: transform 0.1s, background 0.2s; }
-        button:active { transform: scale(0.98); background: #218838; }
+        button { width: 100%; padding: 15px; font-size: 1.2em; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         #status { margin-top: 20px; font-weight: bold; color: #2b7de9; height: 24px; }
     </style>
 </head>
@@ -26,36 +22,18 @@
         <button onclick="sendData()">Send to Mom</button>
         <div id="status"></div>
     </div>
-
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec"; 
-
-        function toTitleCase(str) {
-            return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-        }
-
+        function toTitleCase(str) { return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); }
         async function sendData() {
-            const entryInput = document.getElementById('entry');
-            const status = document.getElementById('status');
-            if(!entryInput.value) return;
-
-            // Capitalize names and items automatically
-            const cleanText = toTitleCase(entryInput.value);
-
-            status.innerText = "🚀 Sending...";
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ action: "add", text: cleanText })
-                });
-                status.innerText = "✅ Sent to Mom!";
-                entryInput.value = "";
-                // Clear the status message after 3 seconds
-                setTimeout(() => { status.innerText = ""; }, 3000);
-            } catch (e) {
-                status.innerText = "❌ Try again!";
-            }
+            const input = document.getElementById('entry');
+            if(!input.value) return;
+            const cleanText = toTitleCase(input.value);
+            document.getElementById('status').innerText = "🚀 Sending...";
+            await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "add", text: cleanText }) });
+            document.getElementById('status').innerText = "✅ Sent to Mom!";
+            input.value = "";
+            setTimeout(() => { document.getElementById('status').innerText = ""; }, 3000);
         }
     </script>
 </body>
