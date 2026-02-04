@@ -4,72 +4,90 @@
     <title>Need List</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #2b7de9; color: white; border: none; cursor: pointer; }
+        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; background-color: #f9f9f9; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 12px; background: #2b7de9; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        button:hover { background: #1a5db3; }
+        #list-container { display: none; margin-top: 20px; border-top: 2px solid #eee; }
+        .list-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        .success-msg { color: green; font-size: 0.9em; text-align: center; }
     </style>
 </head>
 <body>
+
+<div class="card">
     <h2>Add to List</h2>
-    <input type="text" id="entry" placeholder="Name Item (e.g. Jeff Shampoo)">
+    <input type="text" id="entry" placeholder="Name Item (e.g. Jeff Shampoo)" onkeydown="if(event.key === 'Enter') sendData()">
     <button onclick="sendData()">Add Request</button>
-    <p id="status"></p>
+    <p id="status" class="success-msg"></p>
 
-    <hr>
-    <h3>Current Needs</h3>
-    <button onclick="fetchList()">Refresh List</button>
-    <ul id="needs-list" style="list-style: none; padding: 0;"></ul>
-    
-    <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec";
+    <button onclick="toggleList()" style="background: #666;">Display/Manage List</button>
 
-        async function sendData() {
-            const entry = document.getElementById('entry').value;
-            const status = document.getElementById('status');
-            if(!entry) return;
+    <div id="list-container">
+        <ul id="needs-list" style="list-style: none; padding: 0;"></ul>
+    </div>
+</div>
 
-            status.innerText = "Sending...";
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec";
+
+    async function sendData() {
+        const entryInput = document.getElementById('entry');
+        const status = document.getElementById('status');
+        if(!entryInput.value) return;
+
+        status.innerText = "Saving...";
+        
+        try {
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                body: JSON.stringify({ text: entryInput.value })
+            });
+            status.innerText = "✅ Saved!";
+            entryInput.value = ""; // Clear input
             
-            try {
-                // We use no-cors mode for simple Apps Script triggers
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    cache: 'no-cache',
-                    body: JSON.stringify({ text: entry })
-                });
-                status.innerText = "Sent successfully!";
-                document.getElementById('entry').value = "";
-            } catch (error) {
-                status.innerText = "Error: " + error;
+            // If the list is currently visible, refresh it
+            if(document.getElementById('list-container').style.display === "block") {
+                fetchList();
             }
+        } catch (error) {
+            status.innerText = "Error: " + error;
         }
+    }
 
-        async function fetchList() {
-            const listElement = document.getElementById('needs-list');
-            listElement.innerHTML = "Loading list...";
+    function toggleList() {
+        const container = document.getElementById('list-container');
+        if (container.style.display === "none" || container.style.display === "") {
+            container.style.display = "block";
+            fetchList();
+        } else {
+            container.style.display = "none";
+        }
+    }
+
+    async function fetchList() {
+        const listElement = document.getElementById('needs-list');
+        listElement.innerHTML = "<li>Loading...</li>";
 
         try {
             const response = await fetch(WEB_APP_URL);
             const data = await response.json();
-        
-            listElement.innerHTML = ""; // Clear loader
-        
-            data.forEach(entry => {
+            
+            listElement.innerHTML = "";
+            data.reverse().forEach(entry => { // .reverse() shows newest first
                 const li = document.createElement('li');
-                li.style.borderBottom = "1px solid #eee";
-                li.style.padding = "10px 0";
-                li.innerHTML = `<strong>${entry.name}</strong> needs <strong>${entry.item}</strong> <br> 
-                                <small style="color: #666">${entry.date}</small>`;
+                li.className = "list-item";
+                li.innerHTML = `<strong>${entry.name}</strong>: ${entry.item} <br> 
+                                <small style="color: #999">${entry.date}</small>`;
                 listElement.appendChild(li);
             });
         } catch (error) {
-            listElement.innerHTML = "Error loading list. Ensure you deployed the script as 'Anyone'.";
-            }
+            listElement.innerHTML = "<li>Error loading list.</li>";
         }
+    }
+</script>
 
-        // Call this on page load to see current items
-        window.onload = fetchList;
-    </script>
 </body>
 </html>
