@@ -8,25 +8,22 @@
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h2 { margin-top: 0; color: #333; }
         
-        /* Input & Main Buttons */
         input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        .btn-main { width: 100%; padding: 12px; background: #2b7de9; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
-        .btn-secondary { width: 100%; padding: 12px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-main { width: 100%; padding: 12px; background: #2b7de9; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
         
-        /* Filter Bar */
-        .filter-group { display: flex; flex-wrap: wrap; gap: 4px; margin: 15px 0; background: #eee; padding: 4px; border-radius: 8px; }
-        .filter-btn { flex: 1; min-width: 70px; padding: 6px; border: none; border-radius: 6px; background: transparent; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s; }
+        /* Filter Bar - Flex wrap ensures all stores show even on small screens */
+        .filter-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; background: #eee; padding: 6px; border-radius: 8px; }
+        .filter-btn { flex: 1; min-width: 80px; padding: 8px 4px; border: none; border-radius: 6px; background: transparent; cursor: pointer; font-size: 12px; font-weight: bold; color: #555; }
         .filter-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #2b7de9; }
 
-        /* List Styling */
-        #list-container { display: none; margin-top: 20px; border-top: 2px solid #eee; }
-        .list-item { border-bottom: 1px solid #eee; padding: 12px 0; list-style: none; }
-        .item-info { flex-grow: 1; }
+        #list-container { margin-top: 10px; border-top: 2px solid #eee; }
+        .list-item { border-bottom: 1px solid #eee; padding: 12px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        .item-info { flex-grow: 1; margin-right: 10px; }
         .item-controls { display: flex; gap: 8px; align-items: center; }
-        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
-        .btn-check { background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-weight: bold; }
+        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; background: white; }
+        .btn-check { background: #28a745; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
         
-        .status-msg { color: #2b7de9; font-size: 0.9em; text-align: center; height: 20px; margin: 10px 0; }
+        .status-msg { color: #2b7de9; font-size: 0.9em; text-align: center; height: 20px; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -37,14 +34,15 @@
     <button class="btn-main" onclick="sendData()">Add Request</button>
     <p id="status" class="status-msg"></p>
 
-    <button class="btn-secondary" onclick="toggleList()">Display/Manage List</button>
-
     <div id="list-container">
+        <h3>Current Needs</h3>
         <div class="filter-group">
             <button class="filter-btn active" onclick="setFilter(this, 'all')">All</button>
             <button class="filter-btn" onclick="setFilter(this, 'none')">No Store</button>
             <button class="filter-btn" onclick="setFilter(this, 'Hy-Vee')">Hy-Vee</button>
+            <button class="filter-btn" onclick="setFilter(this, 'Fareway')">Fareway</button>
             <button class="filter-btn" onclick="setFilter(this, 'Target')">Target</button>
+            <button class="filter-btn" onclick="setFilter(this, 'Wal-Mart')">Wal-Mart</button>
             <button class="filter-btn" onclick="setFilter(this, 'Costco')">Costco</button>
         </div>
         <ul id="needs-list" style="padding: 0;"></ul>
@@ -52,48 +50,54 @@
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec";
+    const WEB_APP_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE";
     let currentData = [];
     const STORES = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
+
+    // Auto-fetch on load
+    window.onload = fetchList;
+
+    function toTitleCase(str) {
+        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
 
     async function sendData() {
         const input = document.getElementById('entry');
         const status = document.getElementById('status');
         if(!input.value) return;
 
+        // Clean up text: "jeff shampoo" -> "Jeff Shampoo"
+        const cleanText = toTitleCase(input.value);
+
         status.innerText = "Saving...";
         try {
             await fetch(WEB_APP_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify({ action: "add", text: input.value })
+                body: JSON.stringify({ action: "add", text: cleanText })
             });
             status.innerText = "✅ Saved!";
             input.value = "";
-            if(document.getElementById('list-container').style.display === "block") fetchList();
+            fetchList(); 
         } catch (e) {
             status.innerText = "❌ Error saving";
         }
     }
 
-    function toggleList() {
-        const container = document.getElementById('list-container');
-        const isHidden = container.style.display === "none" || container.style.display === "";
-        container.style.display = isHidden ? "block" : "none";
-        if (isHidden) fetchList();
-    }
-
     async function fetchList() {
         const listElement = document.getElementById('needs-list');
-        listElement.innerHTML = "<li>Loading...</li>";
+        listElement.innerHTML = "<li>Loading list...</li>";
         try {
             const response = await fetch(WEB_APP_URL);
             currentData = await response.json();
-            // Maintain current active filter when refreshing
-            const activeFilter = document.querySelector('.filter-btn.active').innerText.toLowerCase();
-            renderList(activeFilter === 'all' ? 'all' : (activeFilter === 'no store' ? 'none' : activeFilter));
+            
+            // Keep the current filter active after a refresh
+            const activeBtn = document.querySelector('.filter-btn.active');
+            const filterValue = activeBtn.innerText === "All" ? "all" : 
+                                (activeBtn.innerText === "No Store" ? "none" : activeBtn.innerText);
+            renderList(filterValue);
         } catch (e) {
-            listElement.innerHTML = "<li>Error loading data.</li>";
+            listElement.innerHTML = "<li>Error loading data. Check Web App URL.</li>";
         }
     }
 
@@ -110,12 +114,11 @@
         let filtered = currentData;
         if (filter === 'none') filtered = currentData.filter(e => !e.store || e.store === "");
         else if (filter !== 'all') {
-            // Case-insensitive match for store names
-            filtered = currentData.filter(e => e.store.toLowerCase() === filter.toLowerCase());
+            filtered = currentData.filter(e => e.store === filter);
         }
 
         if (filtered.length === 0) {
-            listElement.innerHTML = `<li style="padding:20px; color:#999; text-align:center;">Empty list for this view.</li>`;
+            listElement.innerHTML = `<li style="padding:20px; color:#999; text-align:center;">No items found.</li>`;
             return;
         }
 
@@ -129,15 +132,13 @@
             });
 
             li.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="item-info">
-                        <strong>${entry.name}</strong>: ${entry.item} <br>
-                        <small style="color:#888;">${entry.date} ${entry.store ? '• ' + entry.store : ''}</small>
-                    </div>
-                    <div class="item-controls">
-                        <select onchange="updateStore(${entry.id}, this.value)">${storeOptions}</select>
-                        <button class="btn-check" onclick="markBought('${entry.name.replace(/'/g, "\\'")}', '${entry.item.replace(/'/g, "\\'")}')">✓</button>
-                    </div>
+                <div class="item-info">
+                    <strong>${entry.name}</strong>: ${entry.item} <br>
+                    <small style="color:#888;">${entry.date} ${entry.store ? '• ' + entry.store : ''}</small>
+                </div>
+                <div class="item-controls">
+                    <select onchange="updateStore(${entry.id}, this.value)">${storeOptions}</select>
+                    <button class="btn-check" onclick="markBought('${entry.name}', '${entry.item}')">✓</button>
                 </div>`;
             listElement.appendChild(li);
         });
@@ -150,10 +151,12 @@
             mode: 'no-cors',
             body: JSON.stringify({ action: "update", type: "store", index: id, value: storeValue })
         });
-        // Update local data so filter stays accurate without a full reload
         const item = currentData.find(d => d.id === id);
         if(item) item.store = storeValue;
         document.getElementById('status').innerText = "Store updated!";
+        // Refresh view to reflect change in filter
+        const activeBtn = document.querySelector('.filter-btn.active');
+        renderList(activeBtn.innerText === "All" ? "all" : (activeBtn.innerText === "No Store" ? "none" : activeBtn.innerText));
     }
 
     async function markBought(name, item) {
@@ -165,7 +168,6 @@
                 mode: 'no-cors',
                 body: JSON.stringify({ action: "delete", name: name, item: item })
             });
-            document.getElementById('status').innerText = "🗑️ Removed";
             fetchList();
         } catch (e) {
             document.getElementById('status').innerText = "Error deleting";
