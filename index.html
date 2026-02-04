@@ -2,44 +2,35 @@
 <html>
 <head>
     <title>Need List - Management</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">    
-    <meta name="application-name" content="Need List">
-    <meta name="apple-mobile-web-app-title" content="Need List">
-    <meta name="theme-color" content="#2b7de9">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2b7de9">
+    <link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/3514/3514491.png">
+
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f7f6; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h2 { margin-top: 0; color: #333; }
-        
         input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
         .btn-main { width: 100%; padding: 12px; background: #2b7de9; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        
-        /* Filter Bar - Flex wrap ensures all stores show even on small screens */
         .filter-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; background: #eee; padding: 6px; border-radius: 8px; }
         .filter-btn { flex: 1; min-width: 80px; padding: 8px 4px; border: none; border-radius: 6px; background: transparent; cursor: pointer; font-size: 12px; font-weight: bold; color: #555; }
         .filter-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #2b7de9; }
-
-        #list-container { margin-top: 10px; border-top: 2px solid #eee; }
         .list-item { border-bottom: 1px solid #eee; padding: 12px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         .item-info { flex-grow: 1; margin-right: 10px; }
         .item-controls { display: flex; gap: 8px; align-items: center; }
-        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; background: white; }
+        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
         .btn-check { background: #28a745; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
-        
         .status-msg { color: #2b7de9; font-size: 0.9em; text-align: center; height: 20px; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
-
 <div class="card">
     <h2>Add to List</h2>
     <input type="text" id="entry" placeholder="Name Item (e.g. Jeff Shampoo)" onkeydown="if(event.key === 'Enter') sendData()">
     <button class="btn-main" onclick="sendData()">Add Request</button>
     <p id="status" class="status-msg"></p>
-
     <div id="list-container">
         <h3>Current Needs</h3>
         <div class="filter-group">
@@ -54,13 +45,11 @@
         <ul id="needs-list" style="padding: 0;"></ul>
     </div>
 </div>
-
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec";
     let currentData = [];
     const STORES = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
 
-    // Auto-fetch on load
     window.onload = fetchList;
 
     function toTitleCase(str) {
@@ -69,79 +58,46 @@
 
     async function sendData() {
         const input = document.getElementById('entry');
-        const status = document.getElementById('status');
         if(!input.value) return;
-
-        // Clean up text: "jeff shampoo" -> "Jeff Shampoo"
         const cleanText = toTitleCase(input.value);
-
-        status.innerText = "Saving...";
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ action: "add", text: cleanText })
-            });
-            status.innerText = "✅ Saved!";
-            input.value = "";
-            fetchList(); 
-        } catch (e) {
-            status.innerText = "❌ Error saving";
-        }
+        document.getElementById('status').innerText = "Saving...";
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "add", text: cleanText }) });
+        document.getElementById('status').innerText = "✅ Saved!";
+        input.value = "";
+        fetchList();
     }
 
     async function fetchList() {
         const listElement = document.getElementById('needs-list');
-        listElement.innerHTML = "<li>Loading list...</li>";
+        listElement.innerHTML = "<li>Loading...</li>";
         try {
             const response = await fetch(WEB_APP_URL);
             currentData = await response.json();
-            
-            // Keep the current filter active after a refresh
             const activeBtn = document.querySelector('.filter-btn.active');
-            const filterValue = activeBtn.innerText === "All" ? "all" : 
-                                (activeBtn.innerText === "No Store" ? "none" : activeBtn.innerText);
-            renderList(filterValue);
-        } catch (e) {
-            listElement.innerHTML = "<li>Error loading data. Check Web App URL.</li>";
-        }
+            renderList(activeBtn.innerText === "All" ? "all" : (activeBtn.innerText === "No Store" ? "none" : activeBtn.innerText));
+        } catch (e) { listElement.innerHTML = "<li>Error loading data.</li>"; }
     }
 
-    function setFilter(btn, filterValue) {
+    function setFilter(btn, val) {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        renderList(filterValue);
+        renderList(val);
     }
 
     function renderList(filter) {
         const listElement = document.getElementById('needs-list');
         listElement.innerHTML = "";
-
         let filtered = currentData;
-        if (filter === 'none') filtered = currentData.filter(e => !e.store || e.store === "");
-        else if (filter !== 'all') {
-            filtered = currentData.filter(e => e.store === filter);
-        }
-
-        if (filtered.length === 0) {
-            listElement.innerHTML = `<li style="padding:20px; color:#999; text-align:center;">No items found.</li>`;
-            return;
-        }
-
+        if (filter === 'none') filtered = currentData.filter(e => !e.store);
+        else if (filter !== 'all') filtered = currentData.filter(e => e.store === filter);
+        
         filtered.forEach(entry => {
             const li = document.createElement('li');
             li.className = "list-item";
-            
             let storeOptions = `<option value="">Select Store</option>`;
-            STORES.forEach(s => {
-                storeOptions += `<option value="${s}" ${entry.store === s ? 'selected' : ''}>${s}</option>`;
-            });
-
+            STORES.forEach(s => storeOptions += `<option value="${s}" ${entry.store === s ? 'selected' : ''}>${s}</option>`);
             li.innerHTML = `
-                <div class="item-info">
-                    <strong>${entry.name}</strong>: ${entry.item} <br>
-                    <small style="color:#888;">${entry.date} ${entry.store ? '• ' + entry.store : ''}</small>
-                </div>
+                <div class="item-info"><strong>${entry.name}</strong>: ${entry.item}<br><small style="color:#888;">${entry.date}</small></div>
                 <div class="item-controls">
                     <select onchange="updateStore(${entry.id}, this.value)">${storeOptions}</select>
                     <button class="btn-check" onclick="markBought('${entry.name}', '${entry.item}')">✓</button>
@@ -150,34 +106,15 @@
         });
     }
 
-    async function updateStore(id, storeValue) {
-        document.getElementById('status').innerText = "Updating store...";
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ action: "update", type: "store", index: id, value: storeValue })
-        });
-        const item = currentData.find(d => d.id === id);
-        if(item) item.store = storeValue;
-        document.getElementById('status').innerText = "Store updated!";
-        // Refresh view to reflect change in filter
-        const activeBtn = document.querySelector('.filter-btn.active');
-        renderList(activeBtn.innerText === "All" ? "all" : (activeBtn.innerText === "No Store" ? "none" : activeBtn.innerText));
+    async function updateStore(id, val) {
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "update", type: "store", index: id, value: val }) });
+        fetchList();
     }
 
     async function markBought(name, item) {
         if(!confirm(`Remove "${item}"?`)) return;
-        document.getElementById('status').innerText = "Removing...";
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ action: "delete", name: name, item: item })
-            });
-            fetchList();
-        } catch (e) {
-            document.getElementById('status').innerText = "Error deleting";
-        }
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "delete", name: name, item: item }) });
+        fetchList();
     }
 </script>
 </body>
