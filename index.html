@@ -1,17 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Need List</title>
+    <title>Need List - Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; background-color: #f9f9f9; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { width: 100%; padding: 12px; background: #2b7de9; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
-        button:hover { background: #1a5db3; }
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #333; }
+        
+        /* Input & Main Buttons */
+        input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .btn-main { width: 100%; padding: 12px; background: #2b7de9; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        .btn-secondary { width: 100%; padding: 12px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        
+        /* Filter Bar */
+        .filter-group { display: flex; flex-wrap: wrap; gap: 4px; margin: 15px 0; background: #eee; padding: 4px; border-radius: 8px; }
+        .filter-btn { flex: 1; min-width: 70px; padding: 6px; border: none; border-radius: 6px; background: transparent; cursor: pointer; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s; }
+        .filter-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #2b7de9; }
+
+        /* List Styling */
         #list-container { display: none; margin-top: 20px; border-top: 2px solid #eee; }
-        .list-item { border-bottom: 1px solid #eee; padding: 10px 0; }
-        .success-msg { color: #2b7de9; font-size: 0.9em; text-align: center; height: 20px; }
+        .list-item { border-bottom: 1px solid #eee; padding: 12px 0; list-style: none; }
+        .item-info { flex-grow: 1; }
+        .item-controls { display: flex; gap: 8px; align-items: center; }
+        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
+        .btn-check { background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-weight: bold; }
+        
+        .status-msg { color: #2b7de9; font-size: 0.9em; text-align: center; height: 20px; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -19,129 +34,141 @@
 <div class="card">
     <h2>Add to List</h2>
     <input type="text" id="entry" placeholder="Name Item (e.g. Jeff Shampoo)" onkeydown="if(event.key === 'Enter') sendData()">
-    <button onclick="sendData()">Add Request</button>
-    <p id="status" class="success-msg"></p>
+    <button class="btn-main" onclick="sendData()">Add Request</button>
+    <p id="status" class="status-msg"></p>
 
-    <button onclick="toggleList()" style="background: #666;">Display/Manage List</button>
+    <button class="btn-secondary" onclick="toggleList()">Display/Manage List</button>
 
     <div id="list-container">
-        <ul id="needs-list" style="list-style: none; padding: 0;"></ul>
+        <div class="filter-group">
+            <button class="filter-btn active" onclick="setFilter(this, 'all')">All</button>
+            <button class="filter-btn" onclick="setFilter(this, 'none')">No Store</button>
+            <button class="filter-btn" onclick="setFilter(this, 'Hy-Vee')">Hy-Vee</button>
+            <button class="filter-btn" onclick="setFilter(this, 'Target')">Target</button>
+            <button class="filter-btn" onclick="setFilter(this, 'Costco')">Costco</button>
+        </div>
+        <ul id="needs-list" style="padding: 0;"></ul>
     </div>
 </div>
 
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec";
+    let currentData = [];
+    const STORES = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
 
     async function sendData() {
-        const entryInput = document.getElementById('entry');
+        const input = document.getElementById('entry');
         const status = document.getElementById('status');
-        if(!entryInput.value) return;
+        if(!input.value) return;
 
         status.innerText = "Saving...";
-        
         try {
             await fetch(WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors', 
-                // ADDED: action: "add" so the script knows what to do
-                body: JSON.stringify({ action: "add", text: entryInput.value })
+                mode: 'no-cors',
+                body: JSON.stringify({ action: "add", text: input.value })
             });
             status.innerText = "✅ Saved!";
-            entryInput.value = ""; 
-            
-            if(document.getElementById('list-container').style.display === "block") {
-                fetchList();
-            }
-        } catch (error) {
-            status.innerText = "Error: " + error;
+            input.value = "";
+            if(document.getElementById('list-container').style.display === "block") fetchList();
+        } catch (e) {
+            status.innerText = "❌ Error saving";
         }
     }
 
     function toggleList() {
         const container = document.getElementById('list-container');
-        if (container.style.display === "none" || container.style.display === "") {
-            container.style.display = "block";
-            fetchList();
-        } else {
-            container.style.display = "none";
-        }
+        const isHidden = container.style.display === "none" || container.style.display === "";
+        container.style.display = isHidden ? "block" : "none";
+        if (isHidden) fetchList();
     }
 
     async function fetchList() {
         const listElement = document.getElementById('needs-list');
         listElement.innerHTML = "<li>Loading...</li>";
-        const stores = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
-
         try {
             const response = await fetch(WEB_APP_URL);
-            const data = await response.json();
-            listElement.innerHTML = "";
-
-            if (data.length === 0) {
-                listElement.innerHTML = "<li>No current needs!</li>";
-                return;
-            }
-
-            data.forEach(entry => {
-                const li = document.createElement('li');
-                li.className = "list-item";
-                
-                let storeOptions = `<option value="">Select Store</option>`;
-                stores.forEach(s => {
-                    storeOptions += `<option value="${s}" ${entry.store === s ? 'selected' : ''}>${s}</option>`;
-                });
-
-                // FIXED: markBought now passes Name and Item strings
-                li.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>${entry.name}</strong>: ${entry.item} <br>
-                            <small>${entry.date} ${entry.store ? '| ' + entry.store : ''}</small>
-                        </div>
-                        <div style="display: flex; gap: 5px;">
-                            <select onchange="updateStore(${entry.id}, this.value)">${storeOptions}</select>
-                            <button onclick="markBought('${entry.name}', '${entry.item}')" style="width:auto; padding:5px; margin:0; background:#28a745;">✓</button>
-                        </div>
-                    </div>`;
-                listElement.appendChild(li);
-            });
-        } catch (error) {
-            listElement.innerHTML = "<li>Error loading list.</li>";
+            currentData = await response.json();
+            // Maintain current active filter when refreshing
+            const activeFilter = document.querySelector('.filter-btn.active').innerText.toLowerCase();
+            renderList(activeFilter === 'all' ? 'all' : (activeFilter === 'no store' ? 'none' : activeFilter));
+        } catch (e) {
+            listElement.innerHTML = "<li>Error loading data.</li>";
         }
     }
 
+    function setFilter(btn, filterValue) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderList(filterValue);
+    }
+
+    function renderList(filter) {
+        const listElement = document.getElementById('needs-list');
+        listElement.innerHTML = "";
+
+        let filtered = currentData;
+        if (filter === 'none') filtered = currentData.filter(e => !e.store || e.store === "");
+        else if (filter !== 'all') {
+            // Case-insensitive match for store names
+            filtered = currentData.filter(e => e.store.toLowerCase() === filter.toLowerCase());
+        }
+
+        if (filtered.length === 0) {
+            listElement.innerHTML = `<li style="padding:20px; color:#999; text-align:center;">Empty list for this view.</li>`;
+            return;
+        }
+
+        filtered.forEach(entry => {
+            const li = document.createElement('li');
+            li.className = "list-item";
+            
+            let storeOptions = `<option value="">Select Store</option>`;
+            STORES.forEach(s => {
+                storeOptions += `<option value="${s}" ${entry.store === s ? 'selected' : ''}>${s}</option>`;
+            });
+
+            li.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="item-info">
+                        <strong>${entry.name}</strong>: ${entry.item} <br>
+                        <small style="color:#888;">${entry.date} ${entry.store ? '• ' + entry.store : ''}</small>
+                    </div>
+                    <div class="item-controls">
+                        <select onchange="updateStore(${entry.id}, this.value)">${storeOptions}</select>
+                        <button class="btn-check" onclick="markBought('${entry.name.replace(/'/g, "\\'")}', '${entry.item.replace(/'/g, "\\'")}')">✓</button>
+                    </div>
+                </div>`;
+            listElement.appendChild(li);
+        });
+    }
+
     async function updateStore(id, storeValue) {
+        document.getElementById('status').innerText = "Updating store...";
         await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({ action: "update", type: "store", index: id, value: storeValue })
         });
+        // Update local data so filter stays accurate without a full reload
+        const item = currentData.find(d => d.id === id);
+        if(item) item.store = storeValue;
+        document.getElementById('status').innerText = "Store updated!";
     }
 
     async function markBought(name, item) {
-        // Simple escaping for names/items with single quotes
-        const safeName = name.replace(/'/g, "\\'");
-        const safeItem = item.replace(/'/g, "\\'");
-        
         if(!confirm(`Remove "${item}"?`)) return;
-        
-        const status = document.getElementById('status');
-        status.innerText = "Removing...";
-
+        document.getElementById('status').innerText = "Removing...";
         try {
             await fetch(WEB_APP_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify({ 
-                    action: "delete", 
-                    name: name, 
-                    item: item 
-                })
+                body: JSON.stringify({ action: "delete", name: name, item: item })
             });
-            status.innerText = "🗑️ Deleted";
-            fetchList(); 
-        } catch (error) {
-            status.innerText = "Error deleting.";
+            document.getElementById('status').innerText = "🗑️ Removed";
+            fetchList();
+        } catch (e) {
+            document.getElementById('status').innerText = "Error deleting";
         }
     }
 </script>
