@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Request Something</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; padding: 40px 20px; text-align: center; background-color: #eef2f7; }
+        .kid-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2b7de9; font-size: 1.5em; }
+        input { width: 100%; padding: 15px; font-size: 1.2em; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; }
+        button { width: 100%; padding: 15px; font-size: 1.2em; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        #status { margin-top: 20px; font-weight: bold; color: #2b7de9; }
+    </style>
+</head>
+<body>
+    <div class="kid-card">
+        <h1>What do you need?</h1>
+        <input type="text" id="entry" placeholder="Name then Item (e.g. Sam Milk)" onkeydown="if(event.key === 'Enter') sendData()">
+        <button onclick="sendData()">Send to Mom & Dad</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec"; 
+
+        async function sendData() {
+            const entryInput = document.getElementById('entry');
+            const status = document.getElementById('status');
+            if(!entryInput.value) return;
+
+            status.innerText = "🚀 Sending...";
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ action: "add", text: entryInput.value })
+                });
+                status.innerText = "✅ Sent!";
+                entryInput.value = "";
+                setTimeout(() => { status.innerText = ""; }, 3000);
+            } catch (e) {
+                status.innerText = "❌ Try again!";
+            }
+        }
+    </script>
+</body>
+</html>
