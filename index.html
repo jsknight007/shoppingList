@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Need List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #2b7de9; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Add to List</h2>
+    <input type="text" id="entry" placeholder="Name Item (e.g. Jeff Shampoo)">
+    <button onclick="sendData()">Add Request</button>
+    <p id="status"></p>
+
+    <script>
+        const WEB_APP_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE";
+
+        async function sendData() {
+            const entry = document.getElementById('entry').value;
+            const status = document.getElementById('status');
+            if(!entry) return;
+
+            status.innerText = "Sending...";
+            
+            try {
+                // We use no-cors mode for simple Apps Script triggers
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    cache: 'no-cache',
+                    body: JSON.stringify({ text: entry })
+                });
+                status.innerText = "Sent successfully!";
+                document.getElementById('entry').value = "";
+            } catch (error) {
+                status.innerText = "Error: " + error;
+            }
+        }
+    </script>
+</body>
+</html>
