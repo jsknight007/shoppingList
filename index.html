@@ -1,82 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Need List - Management</title>
+    <title>Parent Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2b7de9">
-    <link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/3514/3514491.png">
     <link rel="manifest" href="manifest.json">
-
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f7f6; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: #333; }
+        h2, h3 { margin-top: 0; color: #333; }
         input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
         .btn-main { width: 100%; padding: 12px; background: #2b7de9; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-email { background: #6f42c1; color: white; border: none; border-radius: 6px; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .filter-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; background: #eee; padding: 6px; border-radius: 8px; }
         .filter-btn { flex: 1; min-width: 80px; padding: 8px 4px; border: none; border-radius: 6px; background: transparent; cursor: pointer; font-size: 12px; font-weight: bold; color: #555; }
         .filter-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #2b7de9; }
         .list-item { border-bottom: 1px solid #eee; padding: 12px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         .item-info { flex-grow: 1; margin-right: 10px; }
         .item-controls { display: flex; gap: 8px; align-items: center; }
-        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
+        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; background: white; }
         .btn-check { background: #28a745; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
         .status-msg { color: #2b7de9; font-size: 0.9em; text-align: center; height: 20px; margin: 10px 0; font-weight: bold; }
+        #setup-screen, #main-screen { display: none; }
     </style>
 </head>
 <body>
+
 <div class="card">
-    <h2>Add to List</h2>
-    <input type="text" id="entry" placeholder="Name Item (e.g. Jeff Shampoo)" onkeydown="if(event.key === 'Enter') sendData()">
-    <button class="btn-main" onclick="sendData()">Add Request</button>
-    <p id="status" class="status-msg"></p>
-    <div id="list-container">
-        <h3>Current Needs</h3>
-        <div class="filter-group">
-            <button class="filter-btn active" onclick="setFilter(this, 'all')">All</button>
-            <button class="filter-btn" onclick="setFilter(this, 'none')">No Store</button>
-            <button class="filter-btn" onclick="setFilter(this, 'Hy-Vee')">Hy-Vee</button>
-            <button class="filter-btn" onclick="setFilter(this, 'Fareway')">Fareway</button>
-            <button class="filter-btn" onclick="setFilter(this, 'Target')">Target</button>
-            <button class="filter-btn" onclick="setFilter(this, 'Wal-Mart')">Wal-Mart</button>
-            <button class="filter-btn" onclick="setFilter(this, 'Costco')">Costco</button>
+    <div id="setup-screen">
+        <h2>Welcome, Parent!</h2>
+        <p>Enter your name once to get started.</p>
+        <input type="text" id="parent-name" placeholder="Your Name">
+        <button class="btn-main" onclick="saveName()">Start Managing</button>
+    </div>
+
+    <div id="main-screen">
+        <h2 id="greeting">Hi!</h2>
+        <input type="text" id="entry" placeholder="Add an item (e.g. Bread)" onkeydown="if(event.key === 'Enter') sendData()">
+        <button class="btn-main" onclick="sendData()">Add to List</button>
+        <p id="status" class="status-msg"></p>
+
+        <div id="list-container">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Current Needs</h3>
+                <span onclick="clearName()" style="font-size: 0.7em; color: #ccc; cursor: pointer;">(Logout)</span>
+            </div>
+            
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="setFilter(this, 'all')">All</button>
+                <button class="filter-btn" onclick="setFilter(this, 'none')">No Store</button>
+                <button class="filter-btn" onclick="setFilter(this, 'Hy-Vee')">Hy-Vee</button>
+                <button class="filter-btn" onclick="setFilter(this, 'Fareway')">Fareway</button>
+                <button class="filter-btn" onclick="setFilter(this, 'Target')">Target</button>
+                <button class="filter-btn" onclick="setFilter(this, 'Wal-Mart')">Wal-Mart</button>
+                <button class="filter-btn" onclick="setFilter(this, 'Costco')">Costco</button>
+            </div>
+            
+            <button class="btn-email" onclick="emailCurrentList()">✉️ Email This View</button>
+            <ul id="needs-list" style="padding: 0;"></ul>
         </div>
-        <ul id="needs-list" style="padding: 0;"></ul>
     </div>
 </div>
+
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec";
     let currentData = [];
     const STORES = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
 
-    window.onload = fetchList;
+    window.onload = function() {
+        const savedName = localStorage.getItem('parentName');
+        if (savedName) showMain(savedName);
+        else document.getElementById('setup-screen').style.display = 'block';
+    };
 
-    function toTitleCase(str) {
-        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    function saveName() {
+        const name = document.getElementById('parent-name').value.trim();
+        if (name) { localStorage.setItem('parentName', name); showMain(name); }
     }
+
+    function showMain(name) {
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'block';
+        document.getElementById('greeting').innerText = "Hi, " + name + "!";
+        fetchList();
+    }
+
+    function clearName() { localStorage.removeItem('parentName'); location.reload(); }
+
+    function toTitleCase(str) { return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); }
 
     async function sendData() {
         const input = document.getElementById('entry');
         if(!input.value) return;
-        const cleanText = toTitleCase(input.value);
+        const name = localStorage.getItem('parentName');
+        const text = toTitleCase(name) + " " + toTitleCase(input.value);
         document.getElementById('status').innerText = "Saving...";
-        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "add", text: cleanText }) });
-        document.getElementById('status').innerText = "✅ Saved!";
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "add", text: text }) });
+        document.getElementById('status').innerText = "✅ Added!";
         input.value = "";
         fetchList();
     }
 
     async function fetchList() {
-        const listElement = document.getElementById('needs-list');
-        listElement.innerHTML = "<li>Loading...</li>";
         try {
             const response = await fetch(WEB_APP_URL);
             currentData = await response.json();
             const activeBtn = document.querySelector('.filter-btn.active');
             renderList(activeBtn.innerText === "All" ? "all" : (activeBtn.innerText === "No Store" ? "none" : activeBtn.innerText));
-        } catch (e) { listElement.innerHTML = "<li>Error loading data.</li>"; }
+        } catch (e) { console.log(e); }
     }
 
     function setFilter(btn, val) {
@@ -116,6 +148,37 @@
         if(!confirm(`Remove "${item}"?`)) return;
         await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "delete", name: name, item: item }) });
         fetchList();
+    }
+
+    // ON-DEMAND EMAIL FUNCTION
+    async function emailCurrentList() {
+        const activeBtn = document.querySelector('.filter-btn.active');
+        const filterName = activeBtn.innerText;
+        document.getElementById('status').innerText = "Sending list to email...";
+        
+        // Use the current visible list
+        let filtered = currentData;
+        if (filterName === 'No Store') filtered = currentData.filter(e => !e.store);
+        else if (filterName !== 'All') filtered = currentData.filter(e => e.store === filterName);
+
+        if (filtered.length === 0) {
+            alert("Nothing to send for this view!");
+            return;
+        }
+
+        const itemsString = filtered.map(e => `${e.name}: ${e.item}`).join("\n");
+        
+        await fetch(WEB_APP_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ 
+                action: "email_demand", 
+                store: filterName, 
+                items: itemsString 
+            }) 
+        });
+        document.getElementById('status').innerText = "✉️ List Sent!";
+        setTimeout(() => document.getElementById('status').innerText = "", 3000);
     }
 </script>
 </body>
