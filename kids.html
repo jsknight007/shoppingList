@@ -234,6 +234,7 @@
             } catch (e) { showToast("Try again!", "error"); }
         }
     </script>
-    <div style="text-align:center; margin-top:1rem; font-size:0.65rem; color:#bdc3c7; font-weight:600;">V2.1.0</div>
+    <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }</script>
+<div style="text-align:center; margin-top:1rem; font-size:0.65rem; color:#bdc3c7; font-weight:600;">V2.1.0</div>
 </body>
 </html>
