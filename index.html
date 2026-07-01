@@ -7,22 +7,40 @@
     <meta name="theme-color" content="#2b7de9">
     <link rel="manifest" href="manifest.json">
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f7f6; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: linear-gradient(135deg, #f4f7f6 0%, #e2e8f0 100%); min-height: 100vh; }
+        .card { background: white; padding: 20px; border-radius: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06); }
         h2, h3 { margin-top: 0; color: #333; }
-        input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        .btn-main { width: 100%; padding: 12px; background: #2b7de9; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-email { background: #6f42c1; color: white; border: none; border-radius: 6px; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .filter-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; background: #eee; padding: 6px; border-radius: 8px; }
-        .filter-btn { flex: 1; min-width: 80px; padding: 8px 4px; border: none; border-radius: 6px; background: transparent; cursor: pointer; font-size: 12px; font-weight: bold; color: #555; }
-        .filter-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #2b7de9; }
-        .list-item { border-bottom: 1px solid #eee; padding: 12px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        input { width: 100%; padding: 14px; margin: 10px 0; box-sizing: border-box; border: 2px solid #e4e6eb; border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #2b7de9; }
+        .btn-main { width: 100%; padding: 14px; background: #2b7de9; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .btn-main:active { transform: scale(0.95); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn-email { background: #6f42c1; color: white; border: none; border-radius: 12px; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 12px; transition: transform 0.15s ease; }
+        .btn-email:active { transform: scale(0.95); }
+        .filter-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; background: #f1f5f9; padding: 6px; border-radius: 12px; }
+        .filter-btn { position: relative; flex: 1; min-width: 70px; padding: 10px 4px; border: none; border-radius: 10px; background: transparent; cursor: pointer; font-size: 0.75rem; font-weight: 700; color: #64748b; transition: all 0.2s ease; }
+        .filter-btn.active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); color: #2b7de9; }
+        .filter-badge { position: absolute; top: -2px; right: 2px; background: #2b7de9; color: white; font-size: 0.55rem; padding: 2px 5px; border-radius: 10px; font-weight: 700; min-width: 14px; text-align: center; }
+        .list-item { border-bottom: 1px solid #f1f5f9; padding: 14px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         .item-info { flex-grow: 1; margin-right: 10px; }
         .item-controls { display: flex; gap: 8px; align-items: center; }
-        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; background: white; }
-        .btn-check { background: #28a745; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
-        .status-msg { color: #2b7de9; font-size: 0.9em; text-align: center; height: 20px; margin: 10px 0; font-weight: bold; }
+        select { padding: 8px; border-radius: 8px; border: 1px solid #e4e6eb; background: white; font-size: 0.85rem; }
+        .btn-check { background: #10b981; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; transition: transform 0.15s ease; }
+        .btn-check:active { transform: scale(0.9); }
+        .refresh-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #94a3b8; transition: transform 0.3s ease; }
+        .refresh-btn.spinning { animation: spin 0.6s ease; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
         #setup-screen, #main-screen { display: none; }
+
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            padding: 12px 24px; border-radius: 50px; font-size: 0.85rem; font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease; white-space: nowrap;
+        }
+        .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.t-success { background: #e6f4ea; color: #137333; }
+        .toast.t-error { background: #fce8e6; color: #c5221f; }
+        .toast.t-info { background: #e8f0fe; color: #1967d2; }
     </style>
 </head>
 <body>
@@ -39,36 +57,79 @@
         <h2 id="greeting">Hi!</h2>
         <input type="text" id="entry" placeholder="Add an item (e.g. Bread)" onkeydown="if(event.key === 'Enter') sendData()">
         <button class="btn-main" onclick="sendData()">Add to List</button>
-        <p id="status" class="status-msg"></p>
 
-        <div id="list-container">
+        <div id="list-container" style="margin-top:20px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Current Needs</h3>
-                <span onclick="clearName()" style="font-size: 0.7em; color: #ccc; cursor: pointer;">(Logout)</span>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <button class="refresh-btn" id="refreshBtn" onclick="refreshList()">↻</button>
+                    <span onclick="clearName()" style="font-size: 0.7em; color: #ccc; cursor: pointer;">(Logout)</span>
+                </div>
             </div>
-            
-            <div class="filter-group">
-                <button class="filter-btn active" onclick="setFilter(this, 'all')">All</button>
-                <button class="filter-btn" onclick="setFilter(this, 'none')">No Store</button>
-                <button class="filter-btn" onclick="setFilter(this, 'Hy-Vee')">Hy-Vee</button>
-                <button class="filter-btn" onclick="setFilter(this, 'Fareway')">Fareway</button>
-                <button class="filter-btn" onclick="setFilter(this, 'Target')">Target</button>
-                <button class="filter-btn" onclick="setFilter(this, 'Wal-Mart')">Wal-Mart</button>
-                <button class="filter-btn" onclick="setFilter(this, 'Costco')">Costco</button>
+
+            <div class="filter-group" id="filterGroup">
+                <button class="filter-btn active" data-filter="all" onclick="setFilter(this, 'all')">All</button>
+                <button class="filter-btn" data-filter="none" onclick="setFilter(this, 'none')">No Store</button>
+                <button class="filter-btn" data-filter="Hy-Vee" onclick="setFilter(this, 'Hy-Vee')">Hy-Vee</button>
+                <button class="filter-btn" data-filter="Fareway" onclick="setFilter(this, 'Fareway')">Fareway</button>
+                <button class="filter-btn" data-filter="Target" onclick="setFilter(this, 'Target')">Target</button>
+                <button class="filter-btn" data-filter="Wal-Mart" onclick="setFilter(this, 'Wal-Mart')">Wal-Mart</button>
+                <button class="filter-btn" data-filter="Costco" onclick="setFilter(this, 'Costco')">Costco</button>
             </div>
-            
-            <button class="btn-email" onclick="emailCurrentList()">✉️ Email This View</button>
+
+            <button class="btn-email" onclick="emailCurrentList()">Email This View</button>
             <ul id="needs-list" style="padding: 0;"></ul>
         </div>
     </div>
 </div>
 
+<div id="toast" class="toast"></div>
+
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyH72NW-8mV1wZANz_DxJM5_nrA63fKRDBoVSPZ-HLAn73yx5cm-aFbHoaidxholMaq/exec";
+    function getScriptUrl() { return localStorage.getItem('script_url') || ''; }
     let currentData = [];
     const STORES = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
 
+    async function fetchWithRetry(url, opts = {}) {
+        try { return await fetch(url, opts); }
+        catch (e) { await new Promise(r => setTimeout(r, 2000)); return await fetch(url, opts); }
+    }
+
+    function showToast(msg, type) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = 'toast t-' + type;
+        requestAnimationFrame(() => { toast.classList.add('visible'); });
+        setTimeout(() => { toast.classList.remove('visible'); }, 3500);
+    }
+
+    function updateBadges() {
+        const counts = { all: currentData.length, none: 0 };
+        STORES.forEach(function(s) { counts[s] = 0; });
+        currentData.forEach(function(e) {
+            if (!e.store) counts.none++;
+            else if (counts[e.store] !== undefined) counts[e.store]++;
+        });
+        document.querySelectorAll('.filter-btn').forEach(function(btn) {
+            const existing = btn.querySelector('.filter-badge');
+            if (existing) existing.remove();
+            const filter = btn.getAttribute('data-filter');
+            const count = counts[filter];
+            if (count > 0 && filter !== 'all') {
+                const badge = document.createElement('span');
+                badge.className = 'filter-badge';
+                badge.textContent = count;
+                btn.appendChild(badge);
+            }
+        });
+    }
+
     window.onload = function() {
+        if (!getScriptUrl()) {
+            document.getElementById('setup-screen').style.display = 'block';
+            document.getElementById('setup-screen').innerHTML = '<h2>Setup</h2><label style="font-size:0.8rem; font-weight:bold;">Apps Script URL</label><input type="text" id="url-cfg" placeholder="Paste your web app URL" style="margin-bottom:12px;"><button class="btn-main" onclick="localStorage.setItem(\'script_url\', document.getElementById(\'url-cfg\').value.trim()); location.reload();">Save & Continue</button>';
+            return;
+        }
         const savedName = localStorage.getItem('parentName');
         if (savedName) showMain(savedName);
         else document.getElementById('setup-screen').style.display = 'block';
@@ -76,110 +137,161 @@
 
     function saveName() {
         const name = document.getElementById('parent-name').value.trim();
-        if (name) { localStorage.setItem('parentName', name); showMain(name); }
+        if (name && name.length <= 50) { localStorage.setItem('parentName', name); showMain(name); }
     }
 
     function showMain(name) {
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('main-screen').style.display = 'block';
-        document.getElementById('greeting').innerText = "Hi, " + name + "!";
+        document.getElementById('greeting').textContent = "Hi, " + name + "!";
         fetchList();
     }
 
     function clearName() { localStorage.removeItem('parentName'); location.reload(); }
+    function toTitleCase(str) { return str.toLowerCase().split(' ').map(function(word) { return word.charAt(0).toUpperCase() + word.slice(1); }).join(' '); }
 
-    function toTitleCase(str) { return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); }
+    function refreshList() {
+        const btn = document.getElementById('refreshBtn');
+        btn.classList.add('spinning');
+        fetchList().then(function() { setTimeout(function() { btn.classList.remove('spinning'); }, 600); });
+    }
 
     async function sendData() {
         const input = document.getElementById('entry');
-        if(!input.value) return;
+        const val = input.value.trim();
+        if (!val || val.length > 200) return;
         const name = localStorage.getItem('parentName');
-        const text = toTitleCase(name) + " " + toTitleCase(input.value);
-        document.getElementById('status').innerText = "Saving...";
-        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "add", text: text }) });
-        document.getElementById('status').innerText = "✅ Added!";
-        input.value = "";
-        fetchList();
+        const text = toTitleCase(name) + " " + toTitleCase(val);
+        showToast("Saving...", "info");
+        try {
+            const params = new URLSearchParams({ action: "add", text: text });
+            const response = await fetchWithRetry(getScriptUrl() + "?" + params);
+            const data = await response.json();
+            if (data.error) {
+                showToast("Error: " + data.error, "error");
+            } else {
+                showToast("Added!", "success");
+                input.value = "";
+                fetchList();
+            }
+        } catch (e) { showToast("Connection error", "error"); }
     }
 
     async function fetchList() {
         try {
-            const response = await fetch(WEB_APP_URL);
-            currentData = await response.json();
+            const response = await fetchWithRetry(getScriptUrl());
+            const data = await response.json();
+            if (data.error) { showToast("Error: " + data.error, "error"); return; }
+            currentData = data;
+            updateBadges();
             const activeBtn = document.querySelector('.filter-btn.active');
-            renderList(activeBtn.innerText === "All" ? "all" : (activeBtn.innerText === "No Store" ? "none" : activeBtn.innerText));
-        } catch (e) { console.log(e); }
+            const filterVal = activeBtn.getAttribute('data-filter');
+            renderList(filterVal);
+        } catch (e) { showToast("Connection error", "error"); }
     }
 
     function setFilter(btn, val) {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
         renderList(val);
     }
 
     function renderList(filter) {
         const listElement = document.getElementById('needs-list');
-        listElement.innerHTML = "";
+        listElement.textContent = "";
         let filtered = currentData;
-        if (filter === 'none') filtered = currentData.filter(e => !e.store);
-        else if (filter !== 'all') filtered = currentData.filter(e => e.store === filter);
-        
-        filtered.forEach(entry => {
+        if (filter === 'none') filtered = currentData.filter(function(e) { return !e.store; });
+        else if (filter !== 'all') filtered = currentData.filter(function(e) { return e.store === filter; });
+
+        filtered.forEach(function(entry) {
             const li = document.createElement('li');
             li.className = "list-item";
-            let storeOptions = `<option value="">Select Store</option>`;
-            STORES.forEach(s => storeOptions += `<option value="${s}" ${entry.store === s ? 'selected' : ''}>${s}</option>`);
-            li.innerHTML = `
-                <div class="item-info"><strong>${entry.name}</strong>: ${entry.item}<br><small style="color:#888;">${entry.date}</small></div>
-                <div class="item-controls">
-                    <select onchange="updateStore(${entry.id}, this.value)">${storeOptions}</select>
-                    <button class="btn-check" onclick="markBought('${entry.name}', '${entry.item}')">✓</button>
-                </div>`;
+
+            const info = document.createElement('div');
+            info.className = 'item-info';
+            const strong = document.createElement('strong');
+            strong.textContent = entry.name;
+            info.appendChild(strong);
+            info.appendChild(document.createTextNode(": " + entry.item));
+            const small = document.createElement('small');
+            small.style.cssText = "color:#94a3b8; display:block; font-size:0.75rem; margin-top:2px;";
+            small.textContent = entry.date;
+            info.appendChild(small);
+
+            const controls = document.createElement('div');
+            controls.className = 'item-controls';
+            const select = document.createElement('select');
+            select.onchange = function() { updateStore(entry.id, this.value); };
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = "";
+            defaultOpt.textContent = "Store";
+            select.appendChild(defaultOpt);
+            STORES.forEach(function(s) {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                if (entry.store === s) opt.selected = true;
+                select.appendChild(opt);
+            });
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'btn-check';
+            checkBtn.textContent = "✓";
+            checkBtn.onclick = function() { markBought(entry.id, entry.name, entry.item); };
+            controls.appendChild(select);
+            controls.appendChild(checkBtn);
+
+            li.appendChild(info);
+            li.appendChild(controls);
             listElement.appendChild(li);
         });
     }
 
     async function updateStore(id, val) {
-        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "update", type: "store", index: id, value: val }) });
-        fetchList();
+        try {
+            const params = new URLSearchParams({ action: "update", index: id, value: val });
+            const response = await fetchWithRetry(getScriptUrl() + "?" + params);
+            const data = await response.json();
+            if (data.error) { showToast("Error: " + data.error, "error"); }
+            else { fetchList(); }
+        } catch (e) { showToast("Connection error", "error"); }
     }
 
-    async function markBought(name, item) {
-        if(!confirm(`Remove "${item}"?`)) return;
-        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "delete", name: name, item: item }) });
-        fetchList();
+    async function markBought(id, name, item) {
+        if (!confirm('Remove "' + item + '"?')) return;
+        try {
+            const params = new URLSearchParams({ action: "delete", index: id, name: name, item: item });
+            const response = await fetchWithRetry(getScriptUrl() + "?" + params);
+            const data = await response.json();
+            if (data.error) { showToast("Error: " + data.error, "error"); }
+            else { showToast("Got it!", "success"); fetchList(); }
+        } catch (e) { showToast("Connection error", "error"); }
     }
 
-    // ON-DEMAND EMAIL FUNCTION
     async function emailCurrentList() {
         const activeBtn = document.querySelector('.filter-btn.active');
-        const filterName = activeBtn.innerText;
-        document.getElementById('status').innerText = "Sending list to email...";
-        
-        // Use the current visible list
+        const filterName = activeBtn.textContent.trim();
+        showToast("Sending list...", "info");
+
         let filtered = currentData;
-        if (filterName === 'No Store') filtered = currentData.filter(e => !e.store);
-        else if (filterName !== 'All') filtered = currentData.filter(e => e.store === filterName);
+        if (filterName === 'No Store') filtered = currentData.filter(function(e) { return !e.store; });
+        else if (filterName !== 'All') filtered = currentData.filter(function(e) { return e.store === filterName; });
 
-        if (filtered.length === 0) {
-            alert("Nothing to send for this view!");
-            return;
-        }
+        if (filtered.length === 0) { showToast("Nothing to send for this view", "error"); return; }
 
-        const itemsString = filtered.map(e => `${e.name}: ${e.item}`).join("\n");
-        
-        await fetch(WEB_APP_URL, { 
-            method: 'POST', 
-            mode: 'no-cors', 
-            body: JSON.stringify({ 
-                action: "email_demand", 
-                store: filterName, 
-                items: itemsString 
-            }) 
-        });
-        document.getElementById('status').innerText = "✉️ List Sent!";
-        setTimeout(() => document.getElementById('status').innerText = "", 3000);
+        const itemsString = filtered.map(function(e) { return e.name + ": " + e.item; }).join("\n");
+
+        try {
+            const response = await fetchWithRetry(getScriptUrl(), {
+                method: 'POST', redirect: 'follow',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: "email_demand", store: filterName, items: itemsString })
+            });
+            const data = await response.json();
+            if (data.error) { showToast("Error: " + data.error, "error"); }
+            else { showToast("List sent!", "success"); }
+        } catch (e) { showToast("Connection error", "error"); }
     }
 </script>
+<div style="text-align:center; margin-top:1rem; font-size:0.65rem; color:#bdc3c7; font-weight:600;">V2.1.0</div>
 </body>
 </html>
