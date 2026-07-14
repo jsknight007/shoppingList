@@ -3,9 +3,15 @@
  * All operations via doGet for proper CORS handling.
  */
 
+const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
 const RECIPIENT_EMAIL = PropertiesService.getScriptProperties().getProperty("RECIPIENT_EMAIL") || "jsknight007@gmail.com";
 const TIMEZONE = Session.getScriptTimeZone();
 const STORES = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
+
+function getSheet() {
+  if (!SPREADSHEET_ID) throw new Error("SPREADSHEET_ID not set in Script Properties");
+  return SpreadsheetApp.openById(SPREADSHEET_ID).getActiveSheet();
+}
 
 function doGet(e) {
   try {
@@ -39,7 +45,7 @@ function handleAdd(params) {
   var item = parts.slice(1).join(" ");
   if (!item) { item = name; name = "General"; }
 
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getSheet();
   sheet.appendRow([new Date(), name, item, ""]);
   return jsonResponse({ status: "success", name: name, item: item });
 }
@@ -48,7 +54,7 @@ function handleUpdate(params) {
   var index = parseInt(params.index);
   var value = params.value || "";
 
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getSheet();
   var lastRow = sheet.getLastRow();
 
   if (isNaN(index) || index < 2 || index > lastRow) {
@@ -64,7 +70,7 @@ function handleUpdate(params) {
 
 function handleDelete(params) {
   var index = parseInt(params.index);
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getSheet();
   var lastRow = sheet.getLastRow();
 
   if (isNaN(index) || index < 2 || index > lastRow) {
@@ -115,7 +121,7 @@ function handleEmail(params) {
 }
 
 function handleFetch() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getSheet();
   var fullData = sheet.getDataRange().getValues();
 
   if (fullData.length <= 1) {
@@ -157,7 +163,7 @@ function handleFetch() {
  * Set up in Triggers (Clock icon).
  */
 function sendDailySummary() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getSheet();
   var data = sheet.getDataRange().getValues();
   if (data.length <= 1) return;
 

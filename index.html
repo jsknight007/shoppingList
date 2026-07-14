@@ -7,30 +7,38 @@
     <meta name="theme-color" content="#2b7de9">
     <link rel="manifest" href="manifest.json">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: linear-gradient(135deg, #f4f7f6 0%, #e2e8f0 100%); min-height: 100vh; }
-        .card { background: white; padding: 20px; border-radius: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06); }
-        h2, h3 { margin-top: 0; color: #333; }
-        input { width: 100%; padding: 14px; margin: 10px 0; box-sizing: border-box; border: 2px solid #e4e6eb; border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.2s; }
-        input:focus { border-color: #2b7de9; }
-        .btn-main { width: 100%; padding: 14px; background: #2b7de9; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        :root { --primary: #2b7de9; --bg: #f4f7f6; --bg-gradient-start: #f4f7f6; --bg-gradient-end: #e2e8f0; --card-bg: white; --text: #333; --border: #e4e6eb; --muted: #94a3b8; --input-bg: white; --filter-bg: #f1f5f9; --item-border: #f1f5f9; --btn-email: #6f42c1; }
+        [data-theme="dark"] { --primary: #60a5fa; --bg: #0f172a; --bg-gradient-start: #0f172a; --bg-gradient-end: #1e293b; --card-bg: #1e293b; --text: #f1f5f9; --border: #334155; --muted: #64748b; --input-bg: #334155; --filter-bg: #273549; --item-border: #334155; --btn-email: #8b5cf6; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); min-height: 100vh; color: var(--text); transition: background 0.3s, color 0.3s; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: background 0.3s, border-color 0.3s; }
+        h2, h3 { margin-top: 0; color: var(--text); }
+        input { width: 100%; padding: 14px; margin: 10px 0; box-sizing: border-box; border: 2px solid var(--border); border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.2s; background: var(--input-bg); color: var(--text); }
+        input:focus { border-color: var(--primary); }
+        .btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: transform 0.15s ease, box-shadow 0.15s ease; }
         .btn-main:active { transform: scale(0.95); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .btn-email { background: #6f42c1; color: white; border: none; border-radius: 12px; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 12px; transition: transform 0.15s ease; }
+        .btn-email { background: var(--btn-email); color: white; border: none; border-radius: 12px; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 12px; transition: transform 0.15s ease; }
         .btn-email:active { transform: scale(0.95); }
-        .filter-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; background: #f1f5f9; padding: 6px; border-radius: 12px; }
-        .filter-btn { position: relative; flex: 1; min-width: 70px; padding: 10px 4px; border: none; border-radius: 10px; background: transparent; cursor: pointer; font-size: 0.75rem; font-weight: 700; color: #64748b; transition: all 0.2s ease; }
-        .filter-btn.active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); color: #2b7de9; }
-        .filter-badge { position: absolute; top: -2px; right: 2px; background: #2b7de9; color: white; font-size: 0.55rem; padding: 2px 5px; border-radius: 10px; font-weight: 700; min-width: 14px; text-align: center; }
-        .list-item { border-bottom: 1px solid #f1f5f9; padding: 14px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .header-controls { display: flex; align-items: center; gap: 8px; }
+        .theme-btn { background: var(--filter-bg); border: 1px solid var(--border); color: var(--muted); font-size: 1rem; padding: 4px 10px; border-radius: 8px; cursor: pointer; transition: transform 0.15s ease; line-height: 1; }
+        .theme-btn:active { transform: scale(0.9); }
+        .filter-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; background: var(--filter-bg); padding: 6px; border-radius: 12px; border: 1px solid var(--border); }
+        .filter-btn { position: relative; flex: 1; min-width: 70px; padding: 10px 4px; border: none; border-radius: 10px; background: transparent; cursor: pointer; font-size: 0.75rem; font-weight: 700; color: var(--muted); transition: all 0.2s ease; }
+        .filter-btn.active { background: var(--card-bg); box-shadow: 0 2px 8px rgba(0,0,0,0.08); color: var(--primary); }
+        .filter-badge { position: absolute; top: -2px; right: 2px; background: var(--primary); color: white; font-size: 0.55rem; padding: 2px 5px; border-radius: 10px; font-weight: 700; min-width: 14px; text-align: center; }
+        .list-item { border-bottom: 1px solid var(--item-border); padding: 14px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         .item-info { flex-grow: 1; margin-right: 10px; }
         .item-controls { display: flex; gap: 8px; align-items: center; }
-        select { padding: 8px; border-radius: 8px; border: 1px solid #e4e6eb; background: white; font-size: 0.85rem; }
+        select { padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 0.85rem; }
         .btn-check { background: #10b981; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; transition: transform 0.15s ease; }
         .btn-check:active { transform: scale(0.9); }
-        .refresh-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #94a3b8; transition: transform 0.3s ease; }
+        .refresh-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--muted); transition: transform 0.3s ease; position: relative; }
         .refresh-btn.spinning { animation: spin 0.6s ease; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        .queue-dot { position: absolute; top: -2px; right: -4px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none; }
         #setup-screen, #main-screen { display: none; }
-
+        .queue-banner { background: #fef3cd; border: 1px solid #ffc107; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.8rem; font-weight: 600; color: #856404; display: none; text-align: center; }
+        [data-theme="dark"] .queue-banner { background: #3d2e00; border-color: #ffc107; color: #ffc107; }
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
             padding: 12px 24px; border-radius: 50px; font-size: 0.85rem; font-weight: 600;
@@ -54,19 +62,22 @@
     </div>
 
     <div id="main-screen">
-        <h2 id="greeting">Hi!</h2>
+        <div class="header-row">
+            <h2 id="greeting">Hi!</h2>
+            <div class="header-controls">
+                <button class="theme-btn" id="themeToggle" onclick="toggleTheme()"></button>
+                <button class="refresh-btn" id="refreshBtn" onclick="refreshList()">↻<span class="queue-dot" id="queueDot"></span></button>
+                <span onclick="clearName()" style="font-size: 0.7em; color: var(--muted); cursor: pointer;">(Logout)</span>
+            </div>
+        </div>
+
+        <div id="queueBanner" class="queue-banner"></div>
+
         <input type="text" id="entry" placeholder="Add an item (e.g. Bread)" onkeydown="if(event.key === 'Enter') sendData()">
         <button class="btn-main" onclick="sendData()">Add to List</button>
 
         <div id="list-container" style="margin-top:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Current Needs</h3>
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <button class="refresh-btn" id="refreshBtn" onclick="refreshList()">↻</button>
-                    <span onclick="clearName()" style="font-size: 0.7em; color: #ccc; cursor: pointer;">(Logout)</span>
-                </div>
-            </div>
-
+            <h3>Current Needs</h3>
             <div class="filter-group" id="filterGroup">
                 <button class="filter-btn active" data-filter="all" onclick="setFilter(this, 'all')">All</button>
                 <button class="filter-btn" data-filter="none" onclick="setFilter(this, 'none')">No Store</button>
@@ -76,7 +87,6 @@
                 <button class="filter-btn" data-filter="Wal-Mart" onclick="setFilter(this, 'Wal-Mart')">Wal-Mart</button>
                 <button class="filter-btn" data-filter="Costco" onclick="setFilter(this, 'Costco')">Costco</button>
             </div>
-
             <button class="btn-email" onclick="emailCurrentList()">Email This View</button>
             <ul id="needs-list" style="padding: 0;"></ul>
         </div>
@@ -90,33 +100,85 @@
     let currentData = [];
     const STORES = ["Hy-Vee", "Fareway", "Target", "Wal-Mart", "Costco"];
 
-    async function fetchWithRetry(url, opts = {}) {
+    // --- Theme ---
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+        localStorage.setItem('theme', theme);
+    }
+    window.toggleTheme = function() {
+        var current = localStorage.getItem('theme') || 'light';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+    applyTheme(localStorage.getItem('theme') || 'light');
+
+    // --- Offline Queue ---
+    function getQueue() { try { return JSON.parse(localStorage.getItem('offline_queue') || '[]'); } catch(e) { return []; } }
+    function saveQueueState(q) { localStorage.setItem('offline_queue', JSON.stringify(q)); updateQueueUI(); }
+    function pushToQueue(action, params) {
+        var q = getQueue();
+        q.push({ action: action, params: params, ts: Date.now() });
+        saveQueueState(q);
+        showToast("Saved offline — will sync later", "info");
+    }
+    function updateQueueUI() {
+        var q = getQueue();
+        var dot = document.getElementById('queueDot');
+        var banner = document.getElementById('queueBanner');
+        if (q.length > 0) {
+            dot.style.display = 'block';
+            banner.textContent = q.length + ' pending action' + (q.length > 1 ? 's' : '') + ' queued offline';
+            banner.style.display = 'block';
+        } else {
+            dot.style.display = 'none';
+            banner.style.display = 'none';
+        }
+    }
+    async function flushQueue() {
+        var q = getQueue();
+        if (q.length === 0) return;
+        var remaining = [];
+        for (var i = 0; i < q.length; i++) {
+            var item = q[i];
+            try {
+                var url = getScriptUrl() + '?' + new URLSearchParams(item.params);
+                var resp = await fetch(url);
+                var data = await resp.json();
+                if (data.error) remaining.push(item);
+            } catch(e) { remaining.push(item); }
+        }
+        saveQueueState(remaining);
+        if (remaining.length === 0 && q.length > 0) showToast("Offline queue synced!", "success");
+    }
+
+    async function fetchWithRetry(url, opts) {
+        opts = opts || {};
         try { return await fetch(url, opts); }
-        catch (e) { await new Promise(r => setTimeout(r, 2000)); return await fetch(url, opts); }
+        catch (e) { await new Promise(function(r) { setTimeout(r, 2000); }); return await fetch(url, opts); }
     }
 
     function showToast(msg, type) {
-        const toast = document.getElementById('toast');
+        var toast = document.getElementById('toast');
         toast.textContent = msg;
         toast.className = 'toast t-' + type;
-        requestAnimationFrame(() => { toast.classList.add('visible'); });
-        setTimeout(() => { toast.classList.remove('visible'); }, 3500);
+        requestAnimationFrame(function() { toast.classList.add('visible'); });
+        setTimeout(function() { toast.classList.remove('visible'); }, 3500);
     }
 
     function updateBadges() {
-        const counts = { all: currentData.length, none: 0 };
+        var counts = { all: currentData.length, none: 0 };
         STORES.forEach(function(s) { counts[s] = 0; });
         currentData.forEach(function(e) {
             if (!e.store) counts.none++;
             else if (counts[e.store] !== undefined) counts[e.store]++;
         });
         document.querySelectorAll('.filter-btn').forEach(function(btn) {
-            const existing = btn.querySelector('.filter-badge');
+            var existing = btn.querySelector('.filter-badge');
             if (existing) existing.remove();
-            const filter = btn.getAttribute('data-filter');
-            const count = counts[filter];
+            var filter = btn.getAttribute('data-filter');
+            var count = counts[filter];
             if (count > 0 && filter !== 'all') {
-                const badge = document.createElement('span');
+                var badge = document.createElement('span');
                 badge.className = 'filter-badge';
                 badge.textContent = count;
                 btn.appendChild(badge);
@@ -127,16 +189,16 @@
     window.onload = function() {
         if (!getScriptUrl()) {
             document.getElementById('setup-screen').style.display = 'block';
-            document.getElementById('setup-screen').innerHTML = '<h2>Setup</h2><label style="font-size:0.8rem; font-weight:bold;">Apps Script URL</label><input type="text" id="url-cfg" placeholder="Paste your web app URL" style="margin-bottom:12px;"><button class="btn-main" onclick="localStorage.setItem(\'script_url\', document.getElementById(\'url-cfg\').value.trim()); location.reload();">Save & Continue</button>';
+            document.getElementById('setup-screen').innerHTML = '<h2>Setup</h2><label style="font-size:0.8rem; font-weight:bold; color:var(--muted);">Apps Script URL</label><input type="text" id="url-cfg" placeholder="Paste your web app URL" style="margin-bottom:12px;"><button class="btn-main" onclick="localStorage.setItem(\'script_url\', document.getElementById(\'url-cfg\').value.trim()); location.reload();">Save & Continue</button>';
             return;
         }
-        const savedName = localStorage.getItem('parentName');
+        var savedName = localStorage.getItem('parentName');
         if (savedName) showMain(savedName);
         else document.getElementById('setup-screen').style.display = 'block';
     };
 
     function saveName() {
-        const name = document.getElementById('parent-name').value.trim();
+        var name = document.getElementById('parent-name').value.trim();
         if (name && name.length <= 50) { localStorage.setItem('parentName', name); showMain(name); }
     }
 
@@ -144,6 +206,8 @@
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('main-screen').style.display = 'block';
         document.getElementById('greeting').textContent = "Hi, " + name + "!";
+        updateQueueUI();
+        flushQueue();
         fetchList();
     }
 
@@ -151,41 +215,37 @@
     function toTitleCase(str) { return str.toLowerCase().split(' ').map(function(word) { return word.charAt(0).toUpperCase() + word.slice(1); }).join(' '); }
 
     function refreshList() {
-        const btn = document.getElementById('refreshBtn');
+        var btn = document.getElementById('refreshBtn');
         btn.classList.add('spinning');
+        flushQueue();
         fetchList().then(function() { setTimeout(function() { btn.classList.remove('spinning'); }, 600); });
     }
 
     async function sendData() {
-        const input = document.getElementById('entry');
-        const val = input.value.trim();
+        var input = document.getElementById('entry');
+        var val = input.value.trim();
         if (!val || val.length > 200) return;
-        const name = localStorage.getItem('parentName');
-        const text = toTitleCase(name) + " " + toTitleCase(val);
+        var name = localStorage.getItem('parentName');
+        var text = toTitleCase(name) + " " + toTitleCase(val);
         showToast("Saving...", "info");
         try {
-            const params = new URLSearchParams({ action: "add", text: text });
-            const response = await fetchWithRetry(getScriptUrl() + "?" + params);
-            const data = await response.json();
-            if (data.error) {
-                showToast("Error: " + data.error, "error");
-            } else {
-                showToast("Added!", "success");
-                input.value = "";
-                fetchList();
-            }
-        } catch (e) { showToast("Connection error", "error"); }
+            var params = new URLSearchParams({ action: "add", text: text });
+            var response = await fetchWithRetry(getScriptUrl() + "?" + params);
+            var data = await response.json();
+            if (data.error) { showToast("Error: " + data.error, "error"); }
+            else { showToast("Added!", "success"); input.value = ""; fetchList(); }
+        } catch (e) { pushToQueue("add", { action: "add", text: text }); }
     }
 
     async function fetchList() {
         try {
-            const response = await fetchWithRetry(getScriptUrl());
-            const data = await response.json();
+            var response = await fetchWithRetry(getScriptUrl());
+            var data = await response.json();
             if (data.error) { showToast("Error: " + data.error, "error"); return; }
             currentData = data;
             updateBadges();
-            const activeBtn = document.querySelector('.filter-btn.active');
-            const filterVal = activeBtn.getAttribute('data-filter');
+            var activeBtn = document.querySelector('.filter-btn.active');
+            var filterVal = activeBtn.getAttribute('data-filter');
             renderList(filterVal);
         } catch (e) { showToast("Connection error", "error"); }
     }
@@ -197,49 +257,46 @@
     }
 
     function renderList(filter) {
-        const listElement = document.getElementById('needs-list');
+        var listElement = document.getElementById('needs-list');
         listElement.textContent = "";
-        let filtered = currentData;
+        var filtered = currentData;
         if (filter === 'none') filtered = currentData.filter(function(e) { return !e.store; });
         else if (filter !== 'all') filtered = currentData.filter(function(e) { return e.store === filter; });
 
         filtered.forEach(function(entry) {
-            const li = document.createElement('li');
+            var li = document.createElement('li');
             li.className = "list-item";
-
-            const info = document.createElement('div');
+            var info = document.createElement('div');
             info.className = 'item-info';
-            const strong = document.createElement('strong');
+            var strong = document.createElement('strong');
             strong.textContent = entry.name;
             info.appendChild(strong);
             info.appendChild(document.createTextNode(": " + entry.item));
-            const small = document.createElement('small');
-            small.style.cssText = "color:#94a3b8; display:block; font-size:0.75rem; margin-top:2px;";
+            var small = document.createElement('small');
+            small.style.cssText = "color:var(--muted); display:block; font-size:0.75rem; margin-top:2px;";
             small.textContent = entry.date;
             info.appendChild(small);
-
-            const controls = document.createElement('div');
+            var controls = document.createElement('div');
             controls.className = 'item-controls';
-            const select = document.createElement('select');
+            var select = document.createElement('select');
             select.onchange = function() { updateStore(entry.id, this.value); };
-            const defaultOpt = document.createElement('option');
+            var defaultOpt = document.createElement('option');
             defaultOpt.value = "";
             defaultOpt.textContent = "Store";
             select.appendChild(defaultOpt);
             STORES.forEach(function(s) {
-                const opt = document.createElement('option');
+                var opt = document.createElement('option');
                 opt.value = s;
                 opt.textContent = s;
                 if (entry.store === s) opt.selected = true;
                 select.appendChild(opt);
             });
-            const checkBtn = document.createElement('button');
+            var checkBtn = document.createElement('button');
             checkBtn.className = 'btn-check';
             checkBtn.textContent = "✓";
             checkBtn.onclick = function() { markBought(entry.id, entry.name, entry.item); };
             controls.appendChild(select);
             controls.appendChild(checkBtn);
-
             li.appendChild(info);
             li.appendChild(controls);
             listElement.appendChild(li);
@@ -248,51 +305,47 @@
 
     async function updateStore(id, val) {
         try {
-            const params = new URLSearchParams({ action: "update", index: id, value: val });
-            const response = await fetchWithRetry(getScriptUrl() + "?" + params);
-            const data = await response.json();
+            var params = new URLSearchParams({ action: "update", index: id, value: val });
+            var response = await fetchWithRetry(getScriptUrl() + "?" + params);
+            var data = await response.json();
             if (data.error) { showToast("Error: " + data.error, "error"); }
             else { fetchList(); }
-        } catch (e) { showToast("Connection error", "error"); }
+        } catch (e) { pushToQueue("update", { action: "update", index: id, value: val }); }
     }
 
     async function markBought(id, name, item) {
         if (!confirm('Remove "' + item + '"?')) return;
         try {
-            const params = new URLSearchParams({ action: "delete", index: id, name: name, item: item });
-            const response = await fetchWithRetry(getScriptUrl() + "?" + params);
-            const data = await response.json();
+            var params = new URLSearchParams({ action: "delete", index: id, name: name, item: item });
+            var response = await fetchWithRetry(getScriptUrl() + "?" + params);
+            var data = await response.json();
             if (data.error) { showToast("Error: " + data.error, "error"); }
             else { showToast("Got it!", "success"); fetchList(); }
-        } catch (e) { showToast("Connection error", "error"); }
+        } catch (e) { pushToQueue("delete", { action: "delete", index: id, name: name, item: item }); }
     }
 
     async function emailCurrentList() {
-        const activeBtn = document.querySelector('.filter-btn.active');
-        const filterName = activeBtn.textContent.trim();
+        var activeBtn = document.querySelector('.filter-btn.active');
+        var filterName = activeBtn.textContent.trim();
         showToast("Sending list...", "info");
-
-        let filtered = currentData;
+        var filtered = currentData;
         if (filterName === 'No Store') filtered = currentData.filter(function(e) { return !e.store; });
         else if (filterName !== 'All') filtered = currentData.filter(function(e) { return e.store === filterName; });
-
         if (filtered.length === 0) { showToast("Nothing to send for this view", "error"); return; }
-
-        const itemsString = filtered.map(function(e) { return e.name + ": " + e.item; }).join("\n");
-
+        var itemsString = filtered.map(function(e) { return e.name + ": " + e.item; }).join("\n");
         try {
-            const response = await fetchWithRetry(getScriptUrl(), {
+            var response = await fetchWithRetry(getScriptUrl(), {
                 method: 'POST', redirect: 'follow',
                 headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({ action: "email_demand", store: filterName, items: itemsString })
             });
-            const data = await response.json();
+            var data = await response.json();
             if (data.error) { showToast("Error: " + data.error, "error"); }
-            else { showToast("List sent!", "success"); }
+            else { showToast("List sent to configured email!", "success"); }
         } catch (e) { showToast("Connection error", "error"); }
     }
 </script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }</script>
-<div style="text-align:center; margin-top:1rem; font-size:0.65rem; color:#bdc3c7; font-weight:600;">V2.1.0</div>
+<div style="text-align:center; margin-top:1rem; font-size:0.65rem; color:var(--muted); font-weight:600;">V3.0.0</div>
 </body>
 </html>
