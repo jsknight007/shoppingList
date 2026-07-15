@@ -131,7 +131,7 @@
         window.onload = function() {
             if (!getScriptUrl()) {
                 document.getElementById('setup-screen').style.display = 'block';
-                document.getElementById('setup-screen').innerHTML = '<h1>Setup</h1><h3>Ask a parent to enter the app URL</h3><input type="text" id="url-cfg" placeholder="Apps Script URL"><button class="send-btn" onclick="localStorage.setItem(\'script_url\', document.getElementById(\'url-cfg\').value.trim()); location.reload();">Save</button>';
+                document.getElementById('setup-screen').innerHTML = '<h1>Setup</h1><h3>Ask a parent to enter the app URL</h3><input type="text" id="url-cfg" placeholder="Apps Script URL"><button class="send-btn" onclick="localStorage.setItem(\'sl_script_url\', document.getElementById(\'url-cfg\').value.trim()); location.reload();">Save</button>';
                 return;
             }
             var savedName = localStorage.getItem('sl_kidName');
@@ -252,6 +252,6 @@
         });
     }
     </script>
-<div id="app-version" style="text-align:center; margin-top:1rem; font-size:0.65rem; color:var(--muted); font-weight:600;">V3.1.0</div>
+<div id="app-version" style="text-align:center; margin-top:1rem; font-size:0.65rem; color:var(--muted); font-weight:600;">V3.3.0</div>
 </body>
 </html>

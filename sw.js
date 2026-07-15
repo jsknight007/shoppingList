@@ -1,4 +1,4 @@
-const APP_VERSION = '3.1.0';
+const APP_VERSION = '3.3.0';
 const CACHE_NAME = 'shopping-list-v' + APP_VERSION;
 const SHELL_FILES = ['index.html', 'kids.html', 'manifest.json', 'kids.json'];
 

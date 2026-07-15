@@ -189,7 +189,7 @@
     window.onload = function() {
         if (!getScriptUrl()) {
             document.getElementById('setup-screen').style.display = 'block';
-            document.getElementById('setup-screen').innerHTML = '<h2>Setup</h2><label style="font-size:0.8rem; font-weight:bold; color:var(--muted);">Apps Script URL</label><input type="text" id="url-cfg" placeholder="Paste your web app URL" style="margin-bottom:12px;"><button class="btn-main" onclick="localStorage.setItem(\'script_url\', document.getElementById(\'url-cfg\').value.trim()); location.reload();">Save & Continue</button>';
+            document.getElementById('setup-screen').innerHTML = '<h2>Setup</h2><label style="font-size:0.8rem; font-weight:bold; color:var(--muted);">Apps Script URL</label><input type="text" id="url-cfg" placeholder="Paste your web app URL" style="margin-bottom:12px;"><button class="btn-main" onclick="localStorage.setItem(\'sl_script_url\', document.getElementById(\'url-cfg\').value.trim()); location.reload();">Save & Continue</button>';
             return;
         }
         var savedName = localStorage.getItem('sl_parentName');
@@ -358,6 +358,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
-<div id="app-version" style="text-align:center; margin-top:1rem; font-size:0.65rem; color:var(--muted); font-weight:600;">V3.1.0</div>
+<div id="app-version" style="text-align:center; margin-top:1rem; font-size:0.65rem; color:var(--muted); font-weight:600;">V3.3.0</div>
 </body>
 </html>
