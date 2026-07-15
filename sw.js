@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shopping-list-v1';
+const CACHE_NAME = 'shopping-list-v2';
 const SHELL_FILES = ['index.html', 'kids.html', 'manifest.json', 'kids.json'];
 
 self.addEventListener('install', (event) => {
